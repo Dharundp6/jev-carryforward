@@ -2,60 +2,66 @@
 
 **What your last session knew, scored against what this one is doing.**
 
-An MCP server with two tools. `record` writes a fact to a per-project ledger the moment it is produced. `recall` brings the ledger back at the start of a task, scored by [Jev](https://typesafe.ai) — TypeSafe's evaluation model, reached through the Vercel AI Gateway — for whether each entry still matters. The next session, or the next agent, starts with what it needs and not the whole history. Nothing is summarised; nothing is deleted.
+An MCP server with two tools. `record` saves a fact the moment it happens. `recall` brings those facts back at the start of a task, keeping only the ones that matter right now.
 
-[![CI](https://github.com/Dharundp6/jev-carryforward/actions/workflows/ci.yml/badge.svg)](https://github.com/Dharundp6/jev-carryforward/actions/workflows/ci.yml)
+Nothing is summarised. Nothing is deleted.
+
 [![npm](https://img.shields.io/npm/v/carryforward?color=red)](https://www.npmjs.com/package/carryforward)
+[![CI](https://github.com/Dharundp6/jev-carryforward/actions/workflows/ci.yml/badge.svg)](https://github.com/Dharundp6/jev-carryforward/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
-## ❌ Without it
+## The problem
 
-A long session ends, or gets compacted mid-flight. The next one starts from a summary — and a summary is lossy in an unbounded way:
+Your session ends, or it gets compacted halfway through. The next one starts from a summary, and summaries lose things:
 
-- the *reason* for a decision is gone, so it gets re-litigated
-- a measured number is gone, so it gets re-measured, or guessed
-- a rule you stated is gone, so it gets broken
-- a guess from three sessions ago is now quoted as a fact
+- The reason behind a decision is gone, so you argue about it again.
+- A number you measured is gone, so you measure it again or guess.
+- A rule you set is gone, so it gets broken.
+- A guess from last week is now repeated as a fact.
 
-Every subagent you spawn has the same problem in miniature, dozens of times a session.
+Every agent you spawn has the same problem, many times a day.
 
-## ✅ With it
+## How it feels to use
+
+You save facts as you go:
 
 ```
-record  constraint  "never force-push; a guard that refuses is information"
-record  decision    "hook warns, never blocks — blocking would force --no-verify"  ref: .git/hooks/pre-push
-record  measurement "14 decisions cost $0.00059, 318 ms median"  ref: triage.mjs  refresh: not reproducible
-record  thread      "email sign-in branch parked until the dashboard lane reopens"  ref: branch dharun-dev/email-signin
+record  constraint  "never force-push, a guard that stops you is telling you something"
+record  decision    "the hook warns instead of blocking, since blocking forces --no-verify"  ref: .git/hooks/pre-push
+record  measurement "14 decisions cost $0.00059, 318 ms each"  ref: triage.mjs  refresh: not reproducible
+record  thread      "email sign-in branch is parked until the dashboard work restarts"  ref: branch dharun-dev/email-signin
 ```
 
-Next session, first task:
+Next session, you start a task:
 
 ```
 recall  "add the scope check as a CI job"
 ```
 
+And you get back only what that task needs:
+
 ```markdown
 # Carried forward
 _task: add the scope check as a CI job_
 
-## Always — constraints and corrections
-- [constraint · told · 2026-09-18] never force-push; a guard that refuses is information
+## Always
+- [constraint] never force-push, a guard that stops you is telling you something
 
 ## Live for this task
-- [decision · decided · 2026-09-18 · p=0.91] hook warns, never blocks — blocking would force --no-verify
+- [decision · p=0.91] the hook warns instead of blocking, since blocking forces --no-verify
   ref: .git/hooks/pre-push
 
 ## Also on record
-- 3f9a12c0 · measurement · 14 decisions cost $0.00059, 318 ms median (p=0.41)
+- 3f9a12c0 · measurement · 14 decisions cost $0.00059, 318 ms each (p=0.41)
 
 _1 entry not relevant to this task, omitted._
 ```
 
-Nothing was summarised. Nothing was deleted. The ledger is still all there for the next task, which will score it differently.
+The rest is still saved. A different task will bring back different things.
 
 ## Install
 
-Needs Node 22+ and an [AI Gateway](https://vercel.com/docs/ai-gateway) key in `AI_GATEWAY_API_KEY` for scoring. Without a key everything still works — `recall` returns the whole ledger and says so.
+You need Node 22 or newer.
 
 **Claude Code**
 
@@ -63,7 +69,7 @@ Needs Node 22+ and an [AI Gateway](https://vercel.com/docs/ai-gateway) key in `A
 claude mcp add carryforward -e AI_GATEWAY_API_KEY=$AI_GATEWAY_API_KEY -- npx -y carryforward
 ```
 
-**Cursor / Claude Desktop / any MCP client**
+**Cursor, Claude Desktop, or any MCP client**
 
 ```json
 {
@@ -77,21 +83,13 @@ claude mcp add carryforward -e AI_GATEWAY_API_KEY=$AI_GATEWAY_API_KEY -- npx -y 
 }
 ```
 
-The ledger is chosen by the server's working directory. Claude Code launches the server in your project, so each project gets its own ledger automatically. Desktop clients launch it from an unrelated directory, so set `CARRYFORWARD_PROJECT` per project as above or every project shares one ledger.
+The key is for scoring. Without it everything still works, and `recall` just gives you the whole list and tells you it could not score.
 
-**From source**
+Each project gets its own file. Claude Code starts the server inside your project, so this happens on its own. Desktop apps start it somewhere else, so set `CARRYFORWARD_PROJECT` for each project or they will all share one file.
 
-```sh
-git clone https://github.com/Dharundp6/jev-carryforward && cd jev-carryforward
-npm install && npm run build
-node dist/cli.js            # serves MCP over stdio
-node dist/cli.js recall     # prints the brief; no task = one line each
-node dist/cli.js path       # where this project's ledger lives
-```
+**Start every session with your rules already loaded**
 
-### Re-inject at session start
-
-The ledger lives on disk, outside the context window, so compaction cannot touch it. To have every session open with the pinned entries already in context, add a `SessionStart` hook in `.claude/settings.json`:
+Add this to `.claude/settings.json`:
 
 ```json
 {
@@ -103,103 +101,104 @@ The ledger lives on disk, outside the context window, so compaction cannot touch
 }
 ```
 
-With no task the hook injects constraints and corrections in full and lists everything else one line each. The model then calls `recall` with the actual task once it knows it, and gets the scored version.
+## What you can save
 
-## How it works
+| kind | what it is | needs a `ref`? |
+|---|---|---|
+| `constraint` | a rule or a boundary you set | no |
+| `correction` | you corrected something the agent did | no |
+| `decision` | a choice, and why you made it | yes |
+| `measurement` | a number you will rely on later | yes |
+| `thread` | work that is parked, blocked, or with someone else | yes |
 
-The sorting axis is not *importance* — everything feels important when it is produced. What predicts whether losing something hurts is whether it can be re-derived, against what being wrong costs:
+Constraints and corrections come back every time, in full. They are never scored, because a model should not get a vote on a rule you set.
 
-|                          | expensive to lose                        | cheap to lose              |
-|--------------------------|------------------------------------------|----------------------------|
-| **not re-derivable**     | **pin** — carried verbatim, never scored | drop                       |
-| **re-derivable cheaply** | **pointer** — carry the ref, refresh it  | **score** — the model's job |
+The other three must point at something real: the command, the pull request, the commit, the file, the link. This keeps the list short, lets anyone check a claim instead of trusting it, and lets an entry fade away once the thing it points at is closed.
 
-Three of the four cells are handled by plain code. The model gets one.
+Each entry also saves **where it came from**: `measured`, `decided`, `told`, or `inferred`. So a guess never gets repeated later as a fact.
 
-### The ledger
+**Write the what before the why.** Entries are matched to a task by their words. One that only explains a reason will not be found by the task it belongs to. There is a real example of this below.
 
-One JSON line per entry, append-only, one file per project (`~/.carryforward/<project>.jsonl`; override with `CARRYFORWARD_DIR` and `CARRYFORWARD_PROJECT`). Nothing is ever rewritten. An entry is retired by appending another that names it in `supersedes` — the old line stays, so a reversed decision remains visible as reversed.
+## How the scoring works
 
-| kind          | what it is                                    | scored? | needs `ref`? |
-|---------------|-----------------------------------------------|---------|--------------|
-| `constraint`  | a rule or boundary the user stated            | never   | no           |
-| `correction`  | the user corrected something you did          | never   | no           |
-| `decision`    | a choice between alternatives, with the reason | yes     | **yes**      |
-| `measurement` | a figure a tool produced that you will rely on | yes     | **yes**      |
-| `thread`      | work parked, blocked, or handed to someone    | yes     | **yes**      |
+For each entry that is not a constraint or a correction, `recall` asks one yes or no question:
 
-Every entry also records **how it was obtained** — `measured`, `decided`, `told` or `inferred` — so a guess cannot be carried forward and quoted later as a fact.
+> Is this still live for the task starting now? Would not knowing it cause wrong or repeated work?
 
-Decisions, measurements and threads **must point at something verifiable**: the command, the PR, the commit, the file, the URL. That keeps the ledger small, makes every claim checkable rather than trusted, and lets an entry expire naturally when the thing it points at closes.
+The answer is a probability, and it decides what you see. Above 0.60 you get the full entry. Between 0.30 and 0.60 you get one line. Below that it is left out. Those numbers are exported constants, not hidden.
 
-**Write the text so it says *what* before *why*.** Recall scores an entry against a future task by its text. An entry that only records a reason will not be found by the task it belongs to — see the measured example below.
+The scorer is [Jev](https://typesafe.ai) from TypeSafe, reached through the Vercel AI Gateway. It is an evaluation model, so it answers questions with probabilities and writes no text at all. That is why it fits here: nothing needs writing, only sorting. A list of a hundred entries is scored in four requests for well under a tenth of a cent.
 
-### Scoring with Jev
+You can use your own scorer instead. Write an `Asker` with one `ask(state, questions)` method and pass it to `recall(entries, task, asker)`.
 
-`recall` asks one yes/no question per non-pinned entry, in one request per 25 entries:
+### A real run
 
-> Entry *N* is still live for the task starting now: not knowing it would cause wrong or repeated work.
+Nine entries from a real project, three different tasks, 1.4 seconds each.
 
-The probability lands the entry on a rung: **≥ 0.60 inject in full**, **0.30–0.60 mention in one line**, **below 0.30 omit**. The thresholds are exported constants, not hidden.
+| entry | "resume the email sign-in work" | "rerun the tests, which failures are real" | "add the scope check as a CI job" |
+|---|---|---|---|
+| email sign-in branch is parked | **0.81** | 0.15 | 0.12 |
+| 105 Windows test failures are environmental | 0.27 | **0.81** | 0.21 |
+| the hook warns instead of blocking | 0.20 | 0.15 | 0.41 |
+| PR #1903, written as *"kept separate from #1860 because..."* | 0.22 | 0.12 | 0.17 |
+| the same fact, rewritten as *"proposes the scope check as a CI check"* | | | **0.70** |
 
-The scorer is [Jev](https://typesafe.ai) by TypeSafe, an evaluation model that answers typed questions with calibrated probabilities and generates no text — which is exactly why it fits: nothing here needs writing, only ranking. It is reached through the Vercel AI Gateway (`typesafe-ai/jev`, $0.042 per million input tokens, no output charge, zero data retention on the gateway route). A hundred-entry ledger scores in four requests for well under a tenth of a cent.
+When an entry clearly fits the task it scores around 0.8, and nothing else comes close.
 
-You can bring your own scorer: implement `Asker` — one `ask(state, questions)` returning a probability per id — and call `recall(entries, task, asker)` from the library.
+The last two rows are the same fact written twice. The first version only explains why the pull request exists and never says what it does, so it was never found. Rewritten to say what it is, it went from left out to shown in full. That is where the "what before why" advice comes from.
 
-### One measured run
+Nine entries and three tasks is a hint, not proof. There is no accuracy claim here until there is a proper test behind it.
 
-Nine entries from a real project ledger, three tasks, live scorer, 1.4 s per recall. The two irrelevant-to-most-tasks entries are omitted from the table for space.
+## Things it will never do
 
-| entry (kind)                                            | "resume the email sign-in work" | "rerun the test suite, which failures are real" | "add the scope check as an advisory CI job" |
-|---------------------------------------------------------|------|------|------|
-| email sign-in branch parked (thread)                    | **0.81** | 0.15 | 0.12 |
-| 105 Windows test failures are environmental (measurement) | 0.27 | **0.81** | 0.21 |
-| pre-push scope hook warns, never blocks (decision)      | 0.20 | 0.15 | 0.41 |
-| PR #1903 *"opened separately from #1860 because…"* (decision) | 0.22 | 0.12 | 0.17 |
-| → rewritten: *"proposes the scope check as an advisory CI check…"* | — | — | **0.70** |
+- **It never deletes anything.** Sorting happens when you read, not when you write. The file only grows.
+- **It never scores your rules.** Constraints and corrections always come back whole.
+- **It never quietly gives you less.** No key, no task, scorer down, rate limited: you get everything, plus a line saying why it could not sort.
+- **It never sends anything when you save.** Only `recall` with a task talks to the network, and your constraints and corrections are never part of that.
 
-When one entry plainly matches the task it scores around 0.8 and the next-best sits under 0.3. The last two rows are the same fact recorded twice: the first version explains *why* the PR exists and never says what it proposes, and the scorer — correctly — could not connect it to the task. Rewritten to say what it is, it moves from omitted to injected. That is where the *what before why* rule comes from. Three tasks and nine entries is a signal, not a measurement; the precision/recall harness below is what would make it one.
+## Where things are kept
 
-### What it never does
+One JSON line per entry, in `~/.carryforward/<project>.jsonl`. Change the location with `CARRYFORWARD_DIR` and the name with `CARRYFORWARD_PROJECT`.
 
-- **Never deletes by probability.** Selection happens at read time, when the task is known. The ledger is written dumb and complete, and stays that way.
-- **Never scores a constraint or a correction.** A model does not get a vote on a rule the user stated.
-- **Never returns less than the ledger holds without saying so.** No key, no task, scorer down, rate-limited — every path falls open to injecting everything, with a note naming why.
-- **Never sends the ledger anywhere at write time.** Only `recall` with a task contacts the scorer, and only the non-pinned entries are in the state it sends.
+Nothing is ever rewritten. To retire an entry you add a new one that names the old one, and the old line stays where it is. So a decision you reversed is still visible as reversed.
 
-## Principles
+If a line ever gets damaged, by a crash or a full disk, it is skipped and counted, never removed, and `recall` tells you it happened.
 
-1. **The record lives outside the context window.** Compaction operates on the window; a record inside it can be damaged by it.
-2. **Never delete at write time; select at read time.** At write time the next task is unknown, so keep/drop is an unrecoverable guess. At read time the task is the query.
-3. **This is separation, not compression.** The expensive-to-lose set is kilobytes. The cheap-to-lose set is megabytes. There is no size pressure on the valuable set; the job is stopping the bulk crowding it out.
-4. **Everything is a pointer to something verifiable**, except constraints and corrections, which are tiny.
-5. **A carried decision is a default the next session may revisit. A carried constraint is not.** The ledger keeps those two visibly different.
-
-## Library
+## Use it as a library
 
 ```ts
 import { append, active, readAll, recall, formatBrief, gatewayAsker, ledgerPath } from "carryforward";
 
-const path = ledgerPath();                          // ~/.carryforward/<project>.jsonl
+const path = ledgerPath();
 append(path, { kind: "constraint", obtained: "told", text: "never force-push" });
 
 const brief = await recall(active(readAll(path)), "add the scope check to CI", gatewayAsker());
 console.log(formatBrief(brief));
 ```
 
-## Not built, on purpose
+## Command line
 
-- **Write-time tagging** — a second, small use of the scorer that classifies events as they happen ("is this user message a correction?") so the model does not have to decide what to record. Tagging cannot lose anything, so it is safe; it is just not in the first slice.
-- **Measured precision and recall.** Every subagent dispatch is a labelled trial — what was injected against what the agent actually used or asked for — and the same diff exists for sessions from the transcript on disk. That measurement is the next thing to build, and no accuracy number gets quoted here before it exists.
+```sh
+npx carryforward              # run the MCP server
+npx carryforward recall       # print what is saved, one line each
+npx carryforward recall "..." # print what matters for this task
+npx carryforward path         # show where this project's file lives
+```
+
+## Not built yet, on purpose
+
+**Sorting as you write.** A small second use of the scorer that labels things as they happen, so you do not have to decide what to save. It cannot lose anything, so it is safe. It is just not needed yet.
+
+**A proper accuracy test.** Every agent you spawn is a test case: compare what was given to it against what it actually used or asked for. Same idea for sessions, using the saved transcript. No accuracy number goes in this file before that exists.
 
 ## Development
 
 ```sh
 npm install
-npm run check    # typecheck + tests + build
+npm run check
 ```
 
-The tests use a fake scorer and never contact the network.
+Tests use a fake scorer and never touch the network.
 
 ## License
 
