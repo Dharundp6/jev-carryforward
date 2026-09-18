@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.dharundp6/jev-carryforward",
+  "title": "carryforward",
+  "description": "What your last session knew, scored against what this one is doing. A per-project ledger written as things happen, recalled per task with TypeSafe's Jev evaluation model.",
+  "repository": {
+    "url": "https://github.com/Dharundp6/jev-carryforward",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "carryforward",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "AI_GATEWAY_API_KEY",
+          "description": "Vercel AI Gateway key used to reach the Jev scorer. Optional: without it recall returns the whole ledger and says so.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "CARRYFORWARD_DIR",
+          "description": "Directory holding the per-project ledgers. Defaults to ~/.carryforward.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "CARRYFORWARD_PROJECT",
+          "description": "Ledger name for this project. Defaults to a slug of the working directory.",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

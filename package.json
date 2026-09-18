@@ -1,0 +1,63 @@
+{
+  "name": "carryforward",
+  "version": "0.1.0",
+  "description": "MCP server that carries what one session learned into the next. A per-project ledger written as things happen, scored per task by TypeSafe's Jev evaluation model via the Vercel AI Gateway.",
+  "type": "module",
+  "bin": {
+    "carryforward": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepublishOnly": "npm run check"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "context-engineering",
+    "claude-code",
+    "cursor",
+    "agents",
+    "memory",
+    "session",
+    "jev",
+    "typesafe",
+    "typesafe-ai",
+    "evaluation-model",
+    "vercel-ai-gateway",
+    "agent-memory"
+  ],
+  "author": "Dharun Prasanth",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dharundp6/jev-carryforward.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dharundp6/jev-carryforward/issues"
+  },
+  "homepage": "https://github.com/Dharundp6/jev-carryforward#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "ai": "^7.0.107",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.0"
+  }
+}
