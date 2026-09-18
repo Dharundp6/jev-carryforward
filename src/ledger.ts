@@ -8,13 +8,15 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createHash, randomBytes } from "node:crypto";
 import { homedir } from "node:os";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import { KINDS, OBTAINED, POINTER, type Entry, type NewEntry } from "./types.js";
 
 /** A readable, collision-resistant name for a project's ledger file. */
 export function projectSlug(cwd: string): string {
+  // Split on both separators so a Windows path slugs the same on any platform.
+  const last = cwd.split(/[\\/]+/).filter(Boolean).pop() ?? "";
   const base =
-    basename(cwd)
+    last
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "project";
