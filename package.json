@@ -1,6 +1,7 @@
 {
   "name": "carryforward",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.dharundp6/jev-carryforward",
   "description": "MCP server that carries what one session learned into the next. A per-project ledger written as things happen, scored per task by TypeSafe's Jev evaluation model via the Vercel AI Gateway.",
   "type": "module",
   "bin": {

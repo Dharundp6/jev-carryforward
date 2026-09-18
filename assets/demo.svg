@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="470" viewBox="0 0 860 470" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" role="img" aria-label="Terminal showing carryforward recall output for a task">
+  <defs>
+    <style>
+      .bg   { fill: #0d1117; }
+      .bar  { fill: #161b22; }
+      .edge { stroke: #30363d; stroke-width: 1; fill: none; }
+      .t    { font-size: 13px; }
+      .dim  { fill: #7d8590; }
+      .txt  { fill: #c9d1d9; }
+      .cmd  { fill: #e6edf3; font-weight: 600; }
+      .grn  { fill: #3fb950; }
+      .pur  { fill: #a371f7; }
+      .blu  { fill: #58a6ff; }
+      .yel  { fill: #d29922; }
+      .ttl  { fill: #8b949e; font-size: 12px; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="860" height="470" rx="10"/>
+  <path class="bar" d="M0 10a10 10 0 0 1 10-10h840a10 10 0 0 1 10 10v26H0z"/>
+  <rect class="edge" x="0.5" y="0.5" width="859" height="469" rx="10"/>
+  <line class="edge" x1="0" y1="36" x2="860" y2="36"/>
+  <circle cx="20" cy="18" r="5.5" fill="#ff5f57"/>
+  <circle cx="39" cy="18" r="5.5" fill="#febc2e"/>
+  <circle cx="58" cy="18" r="5.5" fill="#28c840"/>
+  <text class="ttl" x="430" y="22" text-anchor="middle">carryforward</text>
+
+  <text class="t" x="24" y="66"><tspan class="grn">$</tspan> <tspan class="cmd">carryforward recall "add the scope check as a CI job"</tspan></text>
+
+  <text class="t" x="24" y="98" class="t"><tspan class="dim"># Carried forward</tspan></text>
+  <text class="t" x="24" y="118"><tspan class="dim">task: add the scope check as a CI job</tspan></text>
+
+  <text class="t" x="24" y="152"><tspan class="pur">## Always</tspan></text>
+  <text class="t" x="24" y="174"><tspan class="txt">- [</tspan><tspan class="yel">constraint</tspan><tspan class="txt">] never force-push, a guard that stops you is</tspan></text>
+  <text class="t" x="24" y="192"><tspan class="txt">  telling you something</tspan></text>
+
+  <text class="t" x="24" y="226"><tspan class="pur">## Live for this task</tspan></text>
+  <text class="t" x="24" y="248"><tspan class="txt">- [</tspan><tspan class="yel">decision</tspan><tspan class="txt"> · </tspan><tspan class="grn">p=0.91</tspan><tspan class="txt">] the hook warns instead of blocking,</tspan></text>
+  <text class="t" x="24" y="266"><tspan class="txt">  since blocking forces --no-verify</tspan></text>
+  <text class="t" x="24" y="284"><tspan class="dim">  ref: .git/hooks/pre-push</tspan></text>
+
+  <text class="t" x="24" y="318"><tspan class="pur">## Also on record</tspan></text>
+  <text class="t" x="24" y="340"><tspan class="txt">- 3f9a12c0 · </tspan><tspan class="yel">measurement</tspan><tspan class="txt"> · 14 decisions cost $0.00059,</tspan></text>
+  <text class="t" x="24" y="358"><tspan class="txt">  318 ms each </tspan><tspan class="blu">(p=0.41)</tspan></text>
+
+  <text class="t" x="24" y="392"><tspan class="dim">6 entries not relevant to this task, omitted.</tspan></text>
+
+  <line class="edge" x1="24" y1="414" x2="836" y2="414"/>
+  <text class="t" x="24" y="440" font-size="12"><tspan class="dim">scored by </tspan><tspan class="pur">Jev</tspan><tspan class="dim"> in 1.4s · nothing summarised · nothing deleted</tspan></text>
+</svg>

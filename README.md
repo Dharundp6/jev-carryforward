@@ -11,6 +11,8 @@ Nothing is summarised. Nothing is deleted.
 [![MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![powered by Jev](https://img.shields.io/badge/scored%20by-Jev-6f42c1)](https://typesafe.ai)
 
+![carryforward recall in a terminal, showing a rule kept in full, a decision scored 0.91 for the task, a measurement shown as one line, and six entries omitted](./assets/demo.svg)
+
 ## Contents
 
 - [The problem](#the-problem)
