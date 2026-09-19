@@ -1,0 +1,17 @@
+{
+  "name": "carryforward",
+  "description": "Memory that survives between sessions. Facts are saved as they happen and brought back per task, scored by Jev so you get what this task needs and not the whole history.",
+  "owner": {
+    "name": "Dharun Prasanth",
+    "url": "https://github.com/Dharundp6"
+  },
+  "plugins": [
+    {
+      "name": "carryforward",
+      "source": "./",
+      "description": "Carries what one session learned into the next, scored per task by Jev.",
+      "version": "0.1.1",
+      "license": "MIT"
+    }
+  ]
+}

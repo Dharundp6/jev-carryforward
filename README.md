@@ -23,6 +23,7 @@ Nothing is summarised. Nothing is deleted.
 - [A real run](#a-real-run)
 - [Things it will never do](#things-it-will-never-do)
 - [Where things are kept](#where-things-are-kept)
+- [What the eval suite found](#what-the-eval-suite-found)
 - [Library and CLI](#library-and-cli)
 - [Help and contributing](#help-and-contributing)
 
@@ -109,7 +110,7 @@ Each project gets its own file. Claude Code starts the server inside your projec
 {
   "hooks": {
     "SessionStart": [
-      { "hooks": [{ "type": "command", "command": "npx -y carryforward recall" }] }
+      { "matcher": "startup|clear|compact", "hooks": [{ "type": "command", "command": "npx -y carryforward recall --quiet" }] }
     ]
   }
 }
@@ -166,6 +167,25 @@ When an entry clearly fits the task it scores around 0.8, and nothing else comes
 The last two rows are the same fact written twice. The first version only explains why the pull request exists and never says what it does, so Jev never connected it to the task. Rewritten to say what it is, it went from left out to shown in full. That is where the "what before why" advice comes from.
 
 Nine entries and three tasks is a hint, not proof. There is no accuracy claim here until there is a proper test behind it.
+
+## What the eval suite found
+
+`evals/` holds a [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals.md) suite, and the first thing it found was a hole in the design.
+
+The payoff case gives the agent a real task, a branch rejected as behind `main`, and asks for the git commands. Nothing in the prompt mentions force-pushing. A rule recorded in an earlier session says never to force-push here, so the only route to the right answer is recalling it. The no-plugin arm is expected to fail. That gap is the measurement.
+
+**With the tools available and the skill installed, the agent called `recall` zero times out of four runs.** Not blocked, not erroring, just never reached for. It answered a git question it already knew the answer to, and proposed a force push.
+
+That is worth stating plainly: **an MCP tool sitting there is not enough.** An agent will not check a memory server before answering something it believes it knows, and a skill telling it to does not reliably change that. This is why the `SessionStart` hook exists and why it matters more than the tools do. The hook injects your rules unconditionally, at startup and again right after compaction, instead of depending on the model choosing to look.
+
+Run it yourself. MCP tools are gated, so they need an operator grant on the command line, not just the case's `allowed_tools`:
+
+```sh
+claude plugin eval . --trust-plugin --ablation with-without \
+  --allow-tools mcp__carryforward__recall mcp__carryforward__record
+```
+
+Mocks in `evals/mocks/` stand in for the server, so runs are deterministic and never spend anything on scoring.
 
 ## Things it will never do
 

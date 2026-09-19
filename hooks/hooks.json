@@ -1,0 +1,17 @@
+{
+  "description": "Puts the recorded rules and corrections back into context when a session starts, when it is cleared, and, most importantly, right after it is compacted. Compaction is the moment those rules are lost, so that is the moment they are worth re-injecting. Advisory only: the command always exits zero and prints nothing when the ledger is empty.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx -y carryforward recall",
+            "timeout": 25
+          }
+        ]
+      }
+    ]
+  }
+}

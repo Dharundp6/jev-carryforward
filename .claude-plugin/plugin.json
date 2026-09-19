@@ -1,0 +1,37 @@
+{
+  "name": "carryforward",
+  "version": "0.1.1",
+  "description": "Carries what one session learned into the next. Saves rules, decisions, measurements and parked work as they happen, then brings back only what the task you are starting actually needs, scored by Jev.",
+  "author": {
+    "name": "Dharun Prasanth",
+    "url": "https://github.com/Dharundp6"
+  },
+  "homepage": "https://github.com/Dharundp6/jev-carryforward",
+  "repository": "https://github.com/Dharundp6/jev-carryforward",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "context",
+    "context-engineering",
+    "session",
+    "agents",
+    "jev",
+    "typesafe",
+    "mcp"
+  ],
+  "skills": [
+    "./skills"
+  ],
+  "mcpServers": {
+    "carryforward": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "carryforward"
+      ]
+    }
+  },
+  "experimental": {
+    "evals": "evals"
+  }
+}

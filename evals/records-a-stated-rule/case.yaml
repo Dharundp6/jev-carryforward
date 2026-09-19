@@ -1,0 +1,38 @@
+schema_version: "1.1"
+name: "records-a-stated-rule"
+description: >-
+  The user states a durable rule in passing while asking for something else.
+  The rule should be saved as a constraint, and the thing they actually asked
+  for should still get answered.
+tags: [smoke]
+runs: 3
+
+execution:
+  max_turns: 6
+  timeout_seconds: 240
+  allowed_tools:
+    - Read
+    - Glob
+    - Grep
+    - Skill
+
+graders:
+  - name: "recorded-as-constraint"
+    type: tool_used
+    input_match: '"kind"\s*:\s*"constraint"'
+    min: 1
+    weight: 2
+
+  - name: "answered-the-actual-question"
+    type: regex
+    pattern: "dependabot|renovate|weekly|schedule"
+    match: contains
+    flags: i
+    target: last_message
+    weight: 1
+    arm: both
+
+  - name: "did-not-record-the-question-itself"
+    type: tool_used
+    max: 2
+    weight: 1
